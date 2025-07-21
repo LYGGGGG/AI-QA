@@ -1,23 +1,22 @@
-package com.example.AI_QA.vo;
+package com.example.AI_QA.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class Result<T> {
-    private boolean success;
+    private int code;
     private String message;
     private T data;
 
     public static <T> Result<T> success(T data) {
-        return new Result<>(true, "成功", data);
+        return new Result<>(200, "操作成功", data);
     }
 
     public static <T> Result<T> error(String msg) {
-        return new Result<>(false, msg, null);
+        return new Result<>(400, msg, null);
     }
 }
-
