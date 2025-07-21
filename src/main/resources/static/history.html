@@ -5,6 +5,7 @@
   <title>历史问答记录</title>
   <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     .container {
         max-width: 800px;
@@ -33,6 +34,15 @@
         padding: 5px 15px;
         margin: 0 10px;
     }
+    .markdown {
+        line-height: 1.6;
+    }
+    .markdown h1, .markdown h2, .markdown h3 {
+        margin: 10px 0 6px;
+    }
+    .markdown p {
+        margin: 4px 0;
+    }
   </style>
 </head>
 <body>
@@ -41,8 +51,10 @@
 
   <div v-for="item in records" :key="item.questionId" class="record">
     <div class="question">Q：{{ item.questionContent }}</div>
-    <div class="answer">A：{{ item.answerContent }}</div>
-    <div class="time" style="color: gray; font-size: 13px;">时间：{{ item.createTime }}</div>
+    <div class="answer markdown" v-html="renderMarkdown(item.answerContent)"></div>
+    <div class="time" style="color: gray; font-size: 13px;">
+      时间：{{ formatTime(item.createTime) }}
+    </div>
   </div>
 
   <div class="pagination" v-if="total > pageSize">
@@ -88,7 +100,16 @@
                   this.page++;
                   this.fetchHistory();
               }
-          }
+          },
+          renderMarkdown(text) {
+              return marked.parse(text || '');
+          },
+          formatTime(datetimeStr) {
+            if (!datetimeStr) return '';
+                const date = new Date(datetimeStr);
+                const pad = n => n.toString().padStart(2, '0');
+              return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ` +
+                `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;}
       }
   });
 </script>

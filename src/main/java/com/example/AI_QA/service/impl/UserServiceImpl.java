@@ -5,7 +5,6 @@ import com.example.AI_QA.mapper.UserMapper;
 import com.example.AI_QA.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -15,9 +14,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User register(User user) {
-        // 密码加密
-        String encryptedPwd = DigestUtils.md5DigestAsHex(user.getPassword().getBytes());
-        user.setPassword(encryptedPwd);
+        // 不加密密码（明文存储）
         user.setRole("user"); // 默认角色
         userMapper.insert(user);
         return user;
@@ -28,10 +25,15 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.findByUsername(username);
         if (user == null) return null;
 
-        String encryptedPwd = DigestUtils.md5DigestAsHex(password.getBytes());
-        if (user.getPassword().equals(encryptedPwd)) {
+        // 直接比对明文密码
+        if (user.getPassword().equals(password)) {
             return user;
         }
         return null;
+    }
+
+    @Override
+    public User findByUsername(String name) {
+        return userMapper.findByUsername(name);
     }
 }

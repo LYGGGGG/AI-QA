@@ -17,7 +17,7 @@ public interface QuestionMapper {
     @Update("UPDATE question SET status = #{status}, update_time = NOW() WHERE id = #{id}")
     void updateStatus(@Param("id") Long id, @Param("status") String status);
 
-    @Select("SELECT q.id AS questionId, q.content AS questionContent, a.answer_content AS answerContent, q.create_time " +
+    @Select("SELECT q.id AS questionId, q.content AS questionContent, a.answer_content AS answerContent, q.create_time AS createTime " +
             "FROM question q LEFT JOIN answer a ON q.id = a.question_id " +
             "WHERE q.user_id = #{userId} " +
             "ORDER BY q.create_time DESC " +

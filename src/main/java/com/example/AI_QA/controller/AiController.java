@@ -3,9 +3,11 @@ package com.example.AI_QA.controller;
 import com.example.AI_QA.common.Result;
 import com.example.AI_QA.entity.Answer;
 import com.example.AI_QA.entity.Question;
+import com.example.AI_QA.entity.User;
 import com.example.AI_QA.mapper.AnswerMapper;
 import com.example.AI_QA.mapper.QuestionMapper;
 import com.example.AI_QA.util.ZhipuAiUtil;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,11 +28,14 @@ public class AiController {
     private AnswerMapper answerMapper;
 
     @PostMapping("/ask")
-    public Result<String> ask(@RequestBody Map<String, String> param) {
+    public Result<String> ask(@RequestBody Map<String, String> param, HttpSession session) {
         String questionText = param.get("question");
 
         // ⚠ 这里暂时写死 userId = 1，后续可从 session 中获取
-        Long userId = 1L;
+//        Long userId = 1L;
+        User user = (User) session.getAttribute("user");
+        Long userId = user.getId();
+
 
         // 1. 保存问题
         Question question = new Question();

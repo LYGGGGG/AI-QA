@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>用户登录</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        .form-container {
+          max-width: 400px;
+          margin: 80px auto;
+          padding: 30px;
+          border: 1px solid #ddd;
+          border-radius: 6px;
+          font-family: Arial;
+        }
+        input {
+          width: 100%;
+          padding: 10px;
+          margin: 10px 0;
+        }
+        button {
+          padding: 8px 16px;
+          width: 100%;
+          background-color: #4CAF50;
+          color: white;
+          font-size: 16px;
+          border: none;
+          cursor: pointer;
+        }
+        .link {
+          text-align: right;
+          margin-top: 10px;
+          font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="form-container">
+    <h2>用户登录</h2>
+    <input v-model="user.username" placeholder="用户名" />
+    <input v-model="user.password" type="password" placeholder="密码" />
+    <button @click="login">登录</button>
+    <div class="link">
+        还没有账号？<a href="register.html">去注册</a>
+    </div>
+</div>
+
+<script>
+    new Vue({
+      el: '#app',
+      data: {
+        user: {
+          username: '',
+          password: ''
+        }
+      },
+      methods: {
+        login() {
+          axios.post('/api/user/login', this.user)
+            .then(res => {
+              if (res.data.code === 0) {
+                alert("登录成功！");
+                window.location.href = "qa.html"; // 登录成功后跳转问答页
+              } else {
+                alert(res.data.message || "登录失败");
+              }
+            });
+        }
+      }
+    });
+</script>
+</body>
+</html>
