@@ -23,7 +23,7 @@ public class UserController {
             return Result.error("用户名或密码错误");
         }
         session.setAttribute("user", dbUser); // 保存 session
-        return Result.success("登录成功");
+        return Result.success(dbUser);
     }
 
     // 用户注册

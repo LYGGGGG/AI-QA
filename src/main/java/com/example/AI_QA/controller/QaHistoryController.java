@@ -1,8 +1,10 @@
 package com.example.AI_QA.controller;
 
 import com.example.AI_QA.common.Result;
+import com.example.AI_QA.entity.User;
 import com.example.AI_QA.mapper.QuestionMapper;
 import com.example.AI_QA.vo.QuestionAnswerVO;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,9 +25,15 @@ public class QaHistoryController {
     @GetMapping("/history")
     public Result<Map<String, Object>> getUserHistory(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size, HttpServletRequest request) {
 
-        Long userId = 1L; // ⚠️ 暂时固定用户 ID
+        // 从 session 中获取当前用户信息
+        User user = (User) request.getSession().getAttribute("user");
+        if (user == null) {
+            return Result.error("未登录");
+        }
+
+        Long userId = user.getId();
 
         int offset = (page - 1) * size;
         List<QuestionAnswerVO> list = questionMapper.findUserQA(userId, size, offset);

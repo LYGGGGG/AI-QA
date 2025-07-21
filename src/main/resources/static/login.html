@@ -61,6 +61,7 @@
             .then(res => {
               if (res.data.code === 0) {
                 alert("登录成功！");
+                sessionStorage.setItem("user", JSON.stringify(res.data.data)); // 保存用户
                 window.location.href = "qa.html"; // 登录成功后跳转问答页
               } else {
                 alert(res.data.message || "登录失败");
