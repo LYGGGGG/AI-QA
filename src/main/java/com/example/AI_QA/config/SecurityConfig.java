@@ -11,9 +11,15 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())  // 禁用CSRF
+                .csrf(csrf -> csrf.disable())  // 禁用 CSRF
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll() // ✅ 放行所有API请求
+                        .requestMatchers(
+                                "/api/**",     // 放行接口
+                                "/qa",         // ✅ 放行页面 /qa
+                                "/css/**",     // ✅ 放行静态资源（如果你有）
+                                "/js/**",
+                                "/images/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form.disable()); // 关闭默认登录页

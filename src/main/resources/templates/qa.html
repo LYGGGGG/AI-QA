@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 问答平台</title>
+
+    <!-- Vue / Axios / marked -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <!-- 页面样式 -->
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #f5f7fa;
+            font-family: "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .qa-container {
+            max-width: 720px;
+            margin: 60px auto;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 24px;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            resize: vertical;
+        }
+
+        button {
+            margin-top: 16px;
+            padding: 10px 24px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background-color: #b2d3fc;
+            cursor: not-allowed;
+        }
+
+        .answer-box {
+            margin-top: 32px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 16px;
+            line-height: 1.7;
+            color: #333;
+        }
+
+        .answer-box h3 {
+            margin-top: 0;
+        }
+
+        .answer-box strong {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app" class="qa-container">
+    <h2>AI 问答平台</h2>
+
+    <textarea
+            v-model="question"
+            placeholder="请输入你的问题..."
+            rows="5"
+            @keydown.enter.exact.prevent="askAI"
+    ></textarea>
+
+    <br>
+    <button @click="askAI" :disabled="loading">
+        {{ loading ? "提问中..." : "提问" }}
+    </button>
+
+    <div class="answer-box" v-if="answer">
+        <h3>AI 的回答：</h3>
+        <div v-html="compiledAnswer"></div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            question: '',
+            answer: '',
+            loading: false
+        },
+        computed: {
+            compiledAnswer() {
+                return marked.parse(this.answer || '');
+            }
+        },
+        methods: {
+            askAI() {
+                if (!this.question.trim()) {
+                    alert("请输入问题！");
+                    return;
+                }
+                this.loading = true;
+                this.answer = "";
+
+                axios.post('/api/ai/ask', { question: this.question })
+                    .then(res => {
+                        if (res.data.code === 0) {
+                            this.answer = res.data.data;
+                            this.$nextTick(() => {
+                                const el = document.querySelector(".answer-box");
+                                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                            });
+                        } else {
+                            this.answer = "出错：" + res.data.msg;
+                        }
+                    })
+                    .catch(err => {
+                        this.answer = "请求失败：" + (err.message || "服务器异常");
+                    })
+                    .finally(() => {
+                        this.loading = false;
+                    });
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
