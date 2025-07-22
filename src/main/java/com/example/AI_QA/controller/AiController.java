@@ -56,7 +56,7 @@ public class AiController {
             answerMapper.insert(answer);
 
             // 4. 更新问题状态
-            questionMapper.updateStatus(question.getId(), "answered");
+            questionMapper.updateStatus(question.getId(), "answered11");
 
             return Result.success(aiAnswer);
         } catch (IOException e) {
