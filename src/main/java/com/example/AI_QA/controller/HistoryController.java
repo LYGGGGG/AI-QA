@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/qa")
-public class QaHistoryController {
+public class HistoryController {
 
     @Autowired
     private QuestionMapper questionMapper;
