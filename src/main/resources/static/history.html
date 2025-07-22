@@ -3,28 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <title>历史问答记录</title>
+
+  <!-- 引入 Vue.js 框架 -->
   <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <!-- 引入 Axios，用于发起 HTTP 请求 -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <!-- 引入 Marked.js，用于将 Markdown 转为 HTML -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
   <style>
+    /* 页面通用样式 */
     body {
       font-family: Arial, sans-serif;
       background-color: #f5f5f5;
       margin: 0;
       padding: 0;
     }
+
+    /* 主容器样式 */
     .container {
       max-width: 800px;
       margin: 40px auto;
       background: #fff;
       padding: 30px;
       border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.08);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
     }
+
+    /* 标题样式 */
     h2 {
       text-align: center;
       margin-bottom: 30px;
     }
+
+    /* 每条问答记录样式 */
     .record {
       background: #fafafa;
       border: 1px solid #e0e0e0;
@@ -32,31 +44,39 @@
       padding: 20px;
       margin-bottom: 20px;
     }
+
     .question {
       font-weight: bold;
       margin-bottom: 12px;
       font-size: 16px;
     }
+
     .answer {
       font-size: 15px;
       color: #333;
       line-height: 1.6;
     }
+
     .answer strong {
       color: #333;
     }
+
     .answer span {
-      white-space: pre-wrap;
+      white-space: pre-wrap; /* 保留换行 */
     }
+
     .time {
       font-size: 13px;
       color: gray;
       margin-top: 10px;
     }
+
+    /* 分页按钮样式 */
     .pagination {
       text-align: center;
       margin-top: 30px;
     }
+
     .pagination button {
       padding: 8px 18px;
       margin: 0 10px;
@@ -67,6 +87,7 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
     .pagination button:disabled {
       background-color: #ccc;
       cursor: not-allowed;
@@ -77,6 +98,7 @@
 <div id="app" class="container">
   <h2>我的问答历史</h2>
 
+  <!-- 问答记录列表 -->
   <div v-for="item in records" :key="item.questionId" class="record">
     <div class="question">Q：{{ item.questionContent }}</div>
     <div class="answer">
@@ -86,6 +108,7 @@
     <div class="time">时间：{{ formatTime(item.createTime) }}</div>
   </div>
 
+  <!-- 分页区域 -->
   <div class="pagination" v-if="total > pageSize">
     <button @click="prevPage" :disabled="page === 1">上一页</button>
     第 {{ page }} 页
@@ -97,18 +120,22 @@
   new Vue({
     el: '#app',
     data: {
-      records: [],
-      total: 0,
-      page: 1,
-      pageSize: 5
+      records: [],        // 问答记录列表
+      total: 0,           // 总记录数
+      page: 1,            // 当前页码
+      pageSize: 5         // 每页记录数
     },
     created() {
-      this.fetchHistory();
+      this.fetchHistory(); // 页面初始化时加载数据
     },
     methods: {
+      // 获取分页问答记录
       fetchHistory() {
         axios.get('/api/qa/history', {
-          params: { page: this.page, size: this.pageSize }
+          params: {
+            page: this.page,
+            size: this.pageSize
+          }
         }).then(res => {
           if (res.data.code === 0) {
             this.records = res.data.data.records;
@@ -119,26 +146,43 @@
           }
         });
       },
+
+      // 上一页
       prevPage() {
         if (this.page > 1) {
           this.page--;
           this.fetchHistory();
         }
       },
+
+      // 下一页
       nextPage() {
         if (this.page * this.pageSize < this.total) {
           this.page++;
           this.fetchHistory();
         }
       },
+
+      // 将 Markdown 文本转为 HTML（行内渲染）
       renderMarkdown(text) {
         return marked.parseInline(text || '');
       },
+
+      // 时间格式化函数：将 ISO 字符串转为 YYYY-MM-DD HH:mm:ss
       formatTime(datetimeStr) {
         if (!datetimeStr) return '';
-        const date = new Date(datetimeStr.replace("T", " ").replace(/-/g, "/"));
-        const pad = n => n.toString().padStart(2, '0');
-        return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ` +
+
+        const cleanStr = datetimeStr.replace("T", " ").replace(/-/g, "/");
+        const date = new Date(cleanStr);
+
+        if (isNaN(date.getTime())) {
+          console.warn("无效时间格式：", datetimeStr);
+          return '无效时间';
+        }
+
+        const pad = n => n < 10 ? '0' + n : '' + n;
+
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
                `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
       }
     }

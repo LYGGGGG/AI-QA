@@ -25,7 +25,8 @@ public class HistoryController {
     @GetMapping("/history")
     public Result<Map<String, Object>> getUserHistory(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size, HttpServletRequest request) {
+            @RequestParam(defaultValue = "10") int size,
+            HttpServletRequest request) {
 
         // 从 session 中获取当前用户信息
         User user = (User) request.getSession().getAttribute("user");
