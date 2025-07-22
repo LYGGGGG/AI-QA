@@ -4,13 +4,25 @@ import okhttp3.*; // 引入 OkHttp 发送 HTTP 请求
 import com.alibaba.fastjson.JSONArray;   // 引入 Fastjson 的 JSONArray 类
 import com.alibaba.fastjson.JSONObject;  // 引入 Fastjson 的 JSONObject 类
 import com.alibaba.fastjson.JSON;        // Fastjson 的 JSON 工具类
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * 调用智谱大模型的工具类
+ * <p>
+ * 为避免在代码中暴露 Token，API Key 从配置文件或环境变量中读取。
+ */
+@Component
 public class ZhipuAiUtil {
 
-    // 替换为你自己的智谱 API Token
-    private static final String API_KEY = "1efd0879c8b84cc69b94a708870ff16b.jcFo2QTRwx6N0Nrh";
+    /**
+     * 智谱 API Token，通过 `application.yml` 中的 `zhipu.api-key` 配置，
+     * 也可通过环境变量 `ZHIPU_API_KEY` 覆盖。
+     */
+    @Value("${zhipu.api-key}")
+    private String apiKey;
 
     // 智谱大模型的调用接口地址
     private static final String API_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
@@ -22,7 +34,7 @@ public class ZhipuAiUtil {
      * @return AI 返回的回答文本
      * @throws IOException 接口调用失败时抛出异常
      */
-    public static String chat(String userQuestion) throws IOException {
+    public String chat(String userQuestion) throws IOException {
         // 创建 OkHttp 客户端
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS)   // 连接超时
@@ -53,7 +65,7 @@ public class ZhipuAiUtil {
         // 构建完整的 HTTP 请求
         Request request = new Request.Builder()
                 .url(API_URL)
-                .addHeader("Authorization", API_KEY) // 添加鉴权 header
+                .addHeader("Authorization", apiKey) // 添加鉴权 header
                 .post(body)
                 .build();
 

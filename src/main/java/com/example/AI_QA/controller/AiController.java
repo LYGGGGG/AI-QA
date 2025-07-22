@@ -27,6 +27,9 @@ public class AiController {
     @Autowired
     private AnswerMapper answerMapper;
 
+    @Autowired
+    private ZhipuAiUtil zhipuAiUtil;
+
     @PostMapping("/ask")
     public Result<String> ask(@RequestBody Map<String, String> param, HttpSession session) {
         String questionText = param.get("question");
@@ -46,7 +49,7 @@ public class AiController {
 
         try {
             // 2. 调用 AI 获取答案
-            String aiAnswer = ZhipuAiUtil.chat(questionText);
+            String aiAnswer = zhipuAiUtil.chat(questionText);
 
             // 3. 保存回答
             Answer answer = new Answer();
