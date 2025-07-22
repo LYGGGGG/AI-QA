@@ -4,6 +4,8 @@ import com.example.AI_QA.entity.User;
 import com.example.AI_QA.mapper.UserMapper;
 import com.example.AI_QA.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,10 +14,15 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
 
+    /** Password encoder for hashing and validating passwords */
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
     @Override
     public User register(User user) {
-        // 不加密密码（明文存储）
+        // 加密密码
         user.setRole("user"); // 默认角色
+        String encodedPwd = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPwd);
         userMapper.insert(user);
         return user;
     }
@@ -25,8 +32,9 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.findByUsername(username);
         if (user == null) return null;
 
-        // 直接比对明文密码
-        if (user.getPassword().equals(password)) {
+        // 比对加密密码
+        /*if (user.getPassword().equals(password)) {*/
+        if (passwordEncoder.matches(password, user.getPassword())){
             return user;
         }
         return null;

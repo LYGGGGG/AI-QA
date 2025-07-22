@@ -18,8 +18,9 @@ public class UserController {
     // 用户登录
     @PostMapping("/login")
     public Result<?> login(@RequestBody User user, HttpSession session) {
-        User dbUser = userService.findByUsername(user.getUsername());
-        if (dbUser == null || !dbUser.getPassword().equals(user.getPassword())) {
+        /*User dbUser = userService.findByUsername(user.getUsername());*/
+        User dbUser = userService.login(user.getUsername(), user.getPassword());
+        if (dbUser == null) {
             return Result.error("用户名或密码错误");
         }
         session.setAttribute("user", dbUser); // 保存 session
