@@ -19,12 +19,26 @@
         border-radius: 6px;
         box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
-    .question {
-        font-weight: bold;
-        margin-bottom: 10px;
+    .qa-line {
+        display: flex;
+        margin-bottom: 8px;
     }
-    .answer {
+    .qa-line .label {
+        font-weight: bold;
+        margin-right: 6px;
+        width: 20px;
+        flex-shrink: 0;
+    }
+    .qa-line .content {
+        flex: 1;
         white-space: pre-wrap;
+    }
+    .qa-line .content.collapsed {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
     }
     .pagination {
         text-align: center;
@@ -50,10 +64,17 @@
   <h2>我的问答历史</h2>
 
   <div v-for="item in records" :key="item.questionId" class="record">
-    <div class="question">Q：{{ item.questionContent }}</div>
-    <div class="answer markdown" v-html="renderMarkdown(item.answerContent)"></div>
+    <div class="qa-line">
+      <div class="label">Q：</div>
+      <div class="content markdown" :class="{collapsed: !item.expanded}" v-html="renderMarkdown(item.questionContent)"></div>
+    </div>
+    <div class="qa-line">
+      <div class="label">A：</div>
+      <div class="content markdown" :class="{collapsed: !item.expanded}" v-html="renderMarkdown(item.answerContent)"></div>
+    </div>
     <div class="time" style="color: gray; font-size: 13px;">
       时间：{{ formatTime(item.createTime) }}
+      <span style="margin-left:10px;color:blue;cursor:pointer" @click="item.expanded = !item.expanded">{{ item.expanded ? '收起' : '展开' }}</span>
     </div>
   </div>
 
@@ -81,10 +102,10 @@
               axios.get('/api/qa/history', {
                   params: { page: this.page, size: this.pageSize }
               }).then(res => {
-                  if (res.data.code === 0) {
-                      this.records = res.data.data.records;
-                      this.total = res.data.data.total;
-                  } else {
+                    if (res.data.code === 0) {
+                        this.records = res.data.data.records.map(r => ({...r, expanded: false}));
+                        this.total = res.data.data.total;
+                    } else {
                       alert("加载失败：" + res.data.message);
                   }
               });

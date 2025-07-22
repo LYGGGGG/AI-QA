@@ -7,6 +7,7 @@ import com.example.AI_QA.entity.User;
 import com.example.AI_QA.mapper.AnswerMapper;
 import com.example.AI_QA.mapper.QuestionMapper;
 import com.example.AI_QA.util.ZhipuAiUtil;
+import com.example.AI_QA.enums.QuestionStatus;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,7 +42,7 @@ public class AiController {
         Question question = new Question();
         question.setUserId(userId);
         question.setContent(questionText);
-        question.setStatus("waiting");
+        question.setStatus(QuestionStatus.WAITING.getValue());
         questionMapper.insert(question); // 插入后 ID 自动回填
 
         try {
@@ -56,12 +57,12 @@ public class AiController {
             answerMapper.insert(answer);
 
             // 4. 更新问题状态
-            questionMapper.updateStatus(question.getId(), "answered11");
+            questionMapper.updateStatus(question.getId(), QuestionStatus.ANSWERED.getValue());
 
             return Result.success(aiAnswer);
         } catch (IOException e) {
             // 调用失败，标记问题状态
-            questionMapper.updateStatus(question.getId(), "error");
+            questionMapper.updateStatus(question.getId(), QuestionStatus.ERROR.getValue());
             return Result.error("AI 调用失败: " + e.getMessage());
         }
     }
