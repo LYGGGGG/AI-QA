@@ -1,0 +1,31 @@
+-- 用户表
+CREATE TABLE `user` (
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '用户ID',
+  `username` VARCHAR(50) NOT NULL UNIQUE COMMENT '用户名',
+  `password` VARCHAR(100) NOT NULL COMMENT '密码（加密存储）',
+  `email` VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
+  `role` ENUM('user', 'admin') DEFAULT 'user' COMMENT '角色',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '注册时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+
+-- 问题表
+CREATE TABLE `question` (
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '问题ID',
+  `user_id` BIGINT NOT NULL COMMENT '提问用户ID',
+  `content` TEXT NOT NULL COMMENT '问题内容',
+  `status` ENUM('waiting', 'answered', 'error') DEFAULT 'waiting' COMMENT '处理状态',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '提问时间',
+  `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='问题表';
+
+-- 回答表
+CREATE TABLE `answer` (
+  `id` BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '回答ID',
+  `question_id` BIGINT NOT NULL COMMENT '关联的问题ID',
+  `answer_content` TEXT COMMENT 'AI回答内容',
+  `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '回答时间',
+  `model_used` VARCHAR(100) DEFAULT NULL COMMENT '使用的AI模型（如 GPT-4）',
+  FOREIGN KEY (`question_id`) REFERENCES `question`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='回答表';
