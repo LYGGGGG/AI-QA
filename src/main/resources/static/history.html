@@ -51,7 +51,9 @@
 
   <div v-for="item in records" :key="item.questionId" class="record">
     <div class="question">Q：{{ item.questionContent }}</div>
-    <div class="answer markdown" v-html="renderMarkdown(item.answerContent)"></div>
+    <div class="answer markdown">
+      <strong>A：</strong><span v-html="renderMarkdown(item.answerContent || '')"></span>
+    </div>
     <div class="time" style="color: gray; font-size: 13px;">
       时间：{{ formatTime(item.createTime) }}
     </div>
@@ -106,7 +108,7 @@
           },
           formatTime(datetimeStr) {
             if (!datetimeStr) return '';
-                const date = new Date(datetimeStr);
+                const date = new Date(datetimeStr.replace("T", " ").replace(/-/g, "/"));
                 const pad = n => n.toString().padStart(2, '0');
               return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ` +
                 `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;}
