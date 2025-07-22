@@ -92,6 +92,24 @@
       background-color: #ccc;
       cursor: not-allowed;
     }
+
+    .collapsed {
+      display: block;
+      max-height: 4.8em; /* 大约 3 行 */
+      overflow: hidden;
+      position: relative;
+    }
+
+    .collapsed::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1.5em;
+      background: linear-gradient(to top, #fafafa, transparent);
+    }
+
   </style>
 </head>
 <body>
@@ -101,9 +119,16 @@
   <!-- 问答记录列表 -->
   <div v-for="item in records" :key="item.questionId" class="record">
     <div class="question">Q：{{ item.questionContent }}</div>
+
     <div class="answer">
       <strong>A：</strong>
-      <span v-html="renderMarkdown(item.answerContent || '')"></span>
+      <div :class="{collapsed: !item.expanded}" v-html="renderMarkdown(item.answerContent || '')"></div>
+      <a v-if="shouldShowToggle(item.answerContent)"
+         href="#"
+         @click.prevent="toggleAnswer(item)"
+         style="margin-left: 10px; font-size:13px; color:#007bff; cursor:pointer;">
+        {{ item.expanded ? '收起' : '展开' }}
+      </a>
     </div>
     <div class="time">时间：{{ formatTime(item.createTime) }}</div>
   </div>
@@ -138,7 +163,7 @@
           }
         }).then(res => {
           if (res.data.code === 0) {
-            this.records = res.data.data.records;
+            this.records = res.data.data.records.map(r => Object.assign(r, {expanded: false }));
             console.log("问答记录数据：", JSON.parse(JSON.stringify(this.records)));
             this.total = res.data.data.total;
           } else {
@@ -162,10 +187,18 @@
           this.fetchHistory();
         }
       },
+      toggleAnswer(item) {
+        item.expanded = !item.expanded;
+      },
+
+      shouldShowToggle(text) {
+        if (!text) return false;
+        return text.split(/\r?\n/).length > 3;
+      },
 
       // 将 Markdown 文本转为 HTML（行内渲染）
       renderMarkdown(text) {
-        return marked.parseInline(text || '');
+        return marked.parse(text || '');
       },
 
       // 时间格式化函数：将 ISO 字符串转为 YYYY-MM-DD HH:mm:ss
