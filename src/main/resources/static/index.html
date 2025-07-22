@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 问答平台</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            background: #f5f7fa;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .index-container {
+            max-width: 600px;
+            margin: 80px auto;
+            padding: 40px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 30px;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 24px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div id="app" class="index-container">
+    <h1>AI 问答平台</h1>
+    <div v-if="user">
+        <p>欢迎，{{ user.username }}！</p>
+        <button @click="gotoQA">进入问答</button>
+        <button @click="gotoHistory">查看历史</button>
+        <button @click="logout">退出登录</button>
+    </div>
+    <div v-else>
+        <button @click="goLogin">登录</button>
+        <button @click="goRegister">注册</button>
+    </div>
+</div>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            user: null
+        },
+        created() {
+            const userStr = sessionStorage.getItem('user');
+            if (userStr) {
+                this.user = JSON.parse(userStr);
+            }
+        },
+        methods: {
+            goLogin() {
+                window.location.href = 'login.html';
+            },
+            goRegister() {
+                window.location.href = 'register.html';
+            },
+            gotoQA() {
+                window.location.href = 'qa.html';
+            },
+            gotoHistory() {
+                window.location.href = 'history.html';
+            },
+            logout() {
+                axios.post('/api/user/logout').then(() => {
+                    sessionStorage.removeItem('user');
+                    this.user = null;
+                });
+            }
+        }
+    });
+</script>
+</body>
+</html>
