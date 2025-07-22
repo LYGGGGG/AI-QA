@@ -25,6 +25,16 @@
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
           text-align: center;
         }
+        .nav {
+          text-align: right;
+          margin-bottom: 10px;
+          font-size: 14px;
+        }
+        .nav a {
+          margin-left: 12px;
+          color: #007bff;
+          text-decoration: none;
+        }
 
         h2 {
           margin-bottom: 20px;
@@ -101,6 +111,11 @@
 </head>
 <body>
 <div id="app" class="qa-container">
+    <div class="nav">
+        <a href="index.html">首页</a>
+        <a href="history.html">历史记录</a>
+        <a href="#" @click.prevent="logout">退出登录</a>
+    </div>
     <div class="user-info">当前用户：{{ currentUser.username || '未登录' }}</div>
 
     <h2>AI 问答平台</h2>
@@ -204,7 +219,12 @@
         },
         formatTime(ts) {
           return ts ? ts.replace("T", " ").slice(0, 19) : '';
-        }
+        },
+        logout() {
+          axios.post('/api/user/logout').then(() => {
+            sessionStorage.removeItem('user');
+            window.location.href = 'index.html';
+          });
       }
     });
 </script>

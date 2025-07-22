@@ -30,6 +30,17 @@
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
     }
 
+    .nav {
+      text-align: right;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    .nav a {
+      margin-left: 12px;
+      color: #007bff;
+      text-decoration: none;
+    }
+
     /* 标题样式 */
     h2 {
       text-align: center;
@@ -114,6 +125,11 @@
 </head>
 <body>
 <div id="app" class="container">
+  <div class="nav">
+    <a href="index.html">首页</a>
+    <a href="qa.html">问答</a>
+    <a href="#" @click.prevent="logout">退出登录</a>
+  </div>
   <h2>我的问答历史</h2>
 
   <!-- 问答记录列表 -->
@@ -217,7 +233,13 @@
 
         return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
                `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-      }
+        },
+        logout() {
+          axios.post('/api/user/logout').then(() => {
+            sessionStorage.removeItem('user');
+            window.location.href = 'index.html';
+          });
+        }
     }
   });
 </script>
