@@ -13,8 +13,8 @@ public interface QuestionMapper {
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(Question question);
 
-    @Update("UPDATE question SET status = #{status} where user_id = #{userId}")
-    void updateStatus(@Param("userId") Long userId, @Param("status") String status);
+    @Update("UPDATE question SET status = #{status} where id = #{id}")
+    void updateStatus(@Param("id") Long id, @Param("status") String status);
 
     @Select("SELECT * FROM question WHERE user_id = #{userId} ORDER BY create_time DESC")
     List<Question> findByUserId(Long userId);
