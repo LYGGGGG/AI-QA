@@ -8,50 +8,40 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     .container {
-      max-width: 800px;
-      margin: 40px auto;
-      font-family: Arial, sans-serif;
+        max-width: 800px;
+        margin: 40px auto;
+        font-family: Arial;
     }
     .record {
-      background: #f9f9f9;
-      padding: 15px;
-      margin-bottom: 20px;
-      border-radius: 6px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        background: #f9f9f9;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 6px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
     .question {
-      font-weight: bold;
-      margin-bottom: 10px;
+        font-weight: bold;
+        margin-bottom: 10px;
     }
-    .preview {
-      color: #444;
-      margin-bottom: 8px;
-    }
-    .full-answer {
-      margin-top: 10px;
-    }
-    .toggle-btn {
-      color: #007bff;
-      cursor: pointer;
-      font-size: 14px;
-      margin-top: 6px;
-      display: inline-block;
-    }
-    .time {
-      color: gray;
-      font-size: 13px;
-      margin-top: 6px;
+    .answer {
+        white-space: pre-wrap;
     }
     .pagination {
-      text-align: center;
-      margin-top: 20px;
+        text-align: center;
+        margin-top: 20px;
     }
     button {
-      padding: 5px 15px;
-      margin: 0 10px;
+        padding: 5px 15px;
+        margin: 0 10px;
     }
     .markdown {
-      line-height: 1.6;
+        line-height: 1.6;
+    }
+    .markdown h1, .markdown h2, .markdown h3 {
+        margin: 10px 0 6px;
+    }
+    .markdown p {
+        margin: 4px 0;
     }
   </style>
 </head>
@@ -59,21 +49,12 @@
 <div id="app" class="container">
   <h2>我的问答历史</h2>
 
-  <div v-for="(item, index) in records" :key="item.questionId" class="record">
+  <div v-for="item in records" :key="item.questionId" class="record">
     <div class="question">Q：{{ item.questionContent }}</div>
-
-    <!-- 回答预览或完整内容 -->
-    <div v-if="!item.expanded" class="preview">
-      A：{{ item.answerContent.slice(0, 100) }}...
+    <div class="answer markdown" v-html="renderMarkdown(item.answerContent)"></div>
+    <div class="time" style="color: gray; font-size: 13px;">
+      时间：{{ formatTime(item.createTime) }}
     </div>
-    <div v-else class="markdown full-answer" v-html="renderMarkdown(item.answerContent)"></div>
-
-    <!-- 展开/收起按钮 -->
-    <div class="toggle-btn" @click="item.expanded = !item.expanded">
-      {{ item.expanded ? '收起回答 ▲' : '展开回答 ▼' }}
-    </div>
-
-    <div class="time">时间：{{ formatTime(item.createTime) }}</div>
   </div>
 
   <div class="pagination" v-if="total > pageSize">
@@ -85,55 +66,51 @@
 
 <script>
   new Vue({
-    el: '#app',
-    data: {
-      records: [],
-      total: 0,
-      page: 1,
-      pageSize: 5
-    },
-    created() {
-      this.fetchHistory();
-    },
-    methods: {
-      fetchHistory() {
-        axios.get('/api/qa/history', {
-          params: { page: this.page, size: this.pageSize }
-        }).then(res => {
-          if (res.data.code === 0) {
-            this.records = res.data.data.records.map(item => ({
-              ...item,
-              expanded: false  // 初始默认折叠
-            }));
-            this.total = res.data.data.total;
-          } else {
-            alert("加载失败：" + res.data.message);
-          }
-        });
+      el: '#app',
+      data: {
+          records: [],
+          total: 0,
+          page: 1,
+          pageSize: 5
       },
-      prevPage() {
-        if (this.page > 1) {
-          this.page--;
+      created() {
           this.fetchHistory();
-        }
       },
-      nextPage() {
-        if (this.page * this.pageSize < this.total) {
-          this.page++;
-          this.fetchHistory();
-        }
-      },
-      renderMarkdown(text) {
-        return marked.parse(text || '');
-      },
-      formatTime(datetimeStr) {
-        if (!datetimeStr) return '';
-        const date = new Date(datetimeStr);
-        const pad = n => n.toString().padStart(2, '0');
-        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
-               `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+      methods: {
+          fetchHistory() {
+              axios.get('/api/qa/history', {
+                  params: { page: this.page, size: this.pageSize }
+              }).then(res => {
+                  if (res.data.code === 0) {
+                      this.records = res.data.data.records;
+                      this.total = res.data.data.total;
+                  } else {
+                      alert("加载失败：" + res.data.message);
+                  }
+              });
+          },
+          prevPage() {
+              if (this.page > 1) {
+                  this.page--;
+                  this.fetchHistory();
+              }
+          },
+          nextPage() {
+              if (this.page * this.pageSize < this.total) {
+                  this.page++;
+                  this.fetchHistory();
+              }
+          },
+          renderMarkdown(text) {
+              return marked.parse(text || '');
+          },
+          formatTime(datetimeStr) {
+            if (!datetimeStr) return '';
+                const date = new Date(datetimeStr);
+                const pad = n => n.toString().padStart(2, '0');
+              return `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())} ` +
+                `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;}
       }
-    }
   });
 </script>
 </body>
