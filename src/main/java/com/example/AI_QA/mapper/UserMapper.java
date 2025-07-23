@@ -17,6 +17,6 @@ public interface UserMapper {
     @Select("SELECT * FROM user WHERE id = #{id}")
     User findById(Long id);
 
-    @Update("Update user SET password = #{newPassWord} WHERE id = #{id}")
-    User updatePassWord(@Param("id") Long id, @Param("password") String password);
+    @Update("UPDATE user SET password = #{password} WHERE id = #{id}")
+    int updatePassWord(@Param("id") Long id, @Param("password") String password);
 }

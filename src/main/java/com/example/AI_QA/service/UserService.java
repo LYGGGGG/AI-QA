@@ -9,5 +9,11 @@ public interface UserService {
 
     User findByUsername(String name);
 
-    User updatePassWord(Long id, String newPassWord);
+    /**
+     * Update the user's password.
+     *
+     * @param id         user id
+     * @param newPassWord new encoded password
+     */
+    void updatePassWord(Long id, String newPassWord);
 }

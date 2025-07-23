@@ -33,17 +33,17 @@ public class UserServiceImpl implements UserService {
 
         if (user == null) return null;
 
-        String storedPW = user.getPassword();
-
         // 比对加密密码
         /*if (user.getPassword().equals(password)) {*/
         if (passwordEncoder.matches(password, user.getPassword())){
             return user;
-        }else if (password.equals(storedPW)){
-            String encoded = passwordEncoder.encode(storedPW);
+        }else if (password.equals(user.getPassword())){
+            String encoded = passwordEncoder.encode(password);
+            userMapper.updatePassWord(user.getId(),encoded);
             user.setPassword(encoded);
-            userMapper.update
+            return user;
         }
+
         return null;
     }
 
@@ -53,7 +53,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updatePassWord(Long id, String newPassWord) {
-        return userMapper.updatePassWord(id, newPassWord);
+    public void updatePassWord(Long id, String newPassWord) {
+        String encoded = passwordEncoder.encode(newPassWord);
+        userMapper.updatePassWord(id, encoded);
     }
 }
