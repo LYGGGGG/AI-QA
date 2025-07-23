@@ -65,6 +65,10 @@
     },
     methods: {
       register() {
+        if (!this.user.username || !this.user.password) {
+          alert("用户名和密码不能为空！");
+          return;
+        }
         axios.post('/api/user/register', this.user)
           .then(res => {
             if (res.data.code === 0) {
