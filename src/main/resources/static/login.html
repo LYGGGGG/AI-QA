@@ -6,37 +6,76 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
+        * {
+          box-sizing: border-box;
+        }
+
+        body {
+          margin: 0;
+          padding: 0;
+          font-family: Arial, sans-serif;
+          background-color: #f5f7fa;
+        }
+
         .form-container {
           max-width: 400px;
-          margin: 80px auto;
+          margin: 100px auto;
           padding: 30px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          font-family: Arial;
+          background-color: #fff;
+          border-radius: 10px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
         }
+
         .nav {
           text-align: right;
           margin-bottom: 10px;
           font-size: 14px;
         }
+
+        .nav a {
+          color: #007bff;
+          text-decoration: none;
+        }
+
+        h2 {
+          text-align: center;
+          margin-bottom: 30px;
+        }
+
         input {
           width: 100%;
-          padding: 10px;
-          margin: 10px 0;
-        }
-        button {
-          padding: 8px 16px;
-          width: 100%;
-          background-color: #4CAF50;
-          color: white;
+          padding: 12px;
+          margin: 12px 0;
+          border: 1px solid #ccc;
+          border-radius: 6px;
           font-size: 16px;
-          border: none;
-          cursor: pointer;
         }
+
+        button {
+          width: 100%;
+          padding: 12px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 16px;
+          cursor: pointer;
+          margin-top: 16px;
+        }
+
+        button:hover {
+          background-color: #0056b3;
+        }
+
         .link {
           text-align: right;
-          margin-top: 10px;
+          margin-top: 14px;
           font-size: 14px;
+        }
+
+        .link a {
+          color: #007bff;
+          text-decoration: none;
         }
     </style>
 </head>
@@ -67,8 +106,8 @@
             .then(res => {
               if (res.data.code === 0) {
                 alert("登录成功！");
-                sessionStorage.setItem("user", JSON.stringify(res.data.data)); // 保存用户
-                window.location.href = "qa.html"; // 登录成功后跳转问答页
+                sessionStorage.setItem("user", JSON.stringify(res.data.data));
+                window.location.href = "qa.html";
               } else {
                 alert(res.data.message || "登录失败");
               }
