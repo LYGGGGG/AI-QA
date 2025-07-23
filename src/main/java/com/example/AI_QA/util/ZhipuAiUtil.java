@@ -1,112 +1,102 @@
 package com.example.AI_QA.util;
 
-import okhttp3.*; // 引入 OkHttp 发送 HTTP 请求
-import com.alibaba.fastjson.JSONArray;   // 引入 Fastjson 的 JSONArray 类
-import com.alibaba.fastjson.JSONObject;  // 引入 Fastjson 的 JSONObject 类
-import com.alibaba.fastjson.JSON;        // Fastjson 的 JSON 工具类
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.example.AI_QA.dto.ChatMessage;
-import java.util.List;
+import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
- * 调用智谱大模型的工具类
- * <p>
- * 为避免在代码中暴露 Token，API Key 从配置文件或环境变量中读取。
+ * 智谱 AI 工具类，封装调用大语言模型的 HTTP 请求逻辑。
+ *
+ * 支持带上下文的多轮对话调用。使用 OkHttp + Fastjson 实现请求构建与响应解析。
  */
 @Component
 public class ZhipuAiUtil {
 
-    // 替换为你自己的智谱 API Token
-//    private static final String API_KEY = "1efd0879c8b84cc69b94a708870ff16b.jcFo2QTRwx6N0Nrh";
-
     /**
-     * 智谱 API Token，通过 `application.yml` 中的 `zhipu.api-key` 配置，
-     * 也可通过环境变量 `ZHIPU_API_KEY` 覆盖。
+     * 智谱大模型 API Key，从 application.yml 中读取。
+     * 示例配置：zhipu.api-key: Bearer xxx.yyy.zzz
      */
     @Value("${zhipu.api-key}")
     private String apiKey;
 
-    // 智谱大模型的调用接口地址
+    /**
+     * 智谱 GLM 模型 API 地址（可根据文档替换为其他模型地址）
+     */
     private static final String API_URL = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
 
     /**
-     * 向智谱大模型发送用户提问并返回 AI 回复内容
-     *
-     * @param userQuestion 用户输入的问题
-     * @return AI 返回的回答文本
-     * @throws IOException 接口调用失败时抛出异常
+     * 调用智谱 AI，进行单轮对话。
+     * @param userQuestion 用户问题（如："什么是Java？"）
+     * @return AI 回复文本
+     * @throws IOException 网络异常或接口调用失败
      */
     public String chat(String userQuestion) throws IOException {
-        // 创建 OkHttp 客户端
         return chat(List.of(new ChatMessage("user", userQuestion)));
     }
 
     /**
-     * 根据历史消息调用 AI 接口，返回回复内容
-     *
-     * @param messages 对话历史
+     * 调用智谱 AI，进行多轮对话（支持上下文）。
+     * @param messages 聊天记录（包括 user / assistant 角色）
+     * @return AI 返回的最新回复内容
+     * @throws IOException 网络异常或接口调用失败
      */
     public String chat(List<ChatMessage> messages) throws IOException {
+        // 1. 构造请求客户端
         OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS)   // 连接超时
-                .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)      // 读取超时（模型响应慢时用）
-                .writeTimeout(20, java.util.concurrent.TimeUnit.SECONDS)     // 写入超时
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(20, TimeUnit.SECONDS)
                 .build();
 
-        JSONObject json = new JSONObject();
-        json.put("model", "glm-4-air-250414"); // 指定使用的模型，可换成 "chatglm_turbo"
+        // 2. 构建请求 JSON 体
+        JSONObject payload = new JSONObject();
+        payload.put("model", "glm-4-air-250414"); // 指定模型名称
 
-       /* // 构建 messages 数组，格式为：[{ "role": "user", "content": "..." }]
-        JSONArray messages = new JSONArray();
-        JSONObject userMessage = new JSONObject();
-        userMessage.put("role", "user");           // 角色为用户
-        userMessage.put("content", userQuestion);  // 用户的问题内容
-        messages.add(userMessage);                 // 添加到数组中*/
-
+        // 构造 messages 数组
         JSONArray msgArray = new JSONArray();
         for (ChatMessage m : messages) {
             JSONObject obj = new JSONObject();
-            obj.put("role", m.getRole());
-            obj.put("content", m.getContent());
+            obj.put("role", m.getRole());       // 角色（user / assistant / system）
+            obj.put("content", m.getContent()); // 消息内容
             msgArray.add(obj);
         }
-        // 将 messages 加入总请求体
-        json.put("messages", messages);
+        payload.put("messages", msgArray); // 加入到主请求体
 
-        // 构建 POST 请求体，设置为 application/json
+        // 3. 构建 POST 请求体
         RequestBody body = RequestBody.create(
-                json.toJSONString(),                           // Fastjson 序列化为字符串
-                MediaType.get("application/json")              // 设置 MIME 类型
+                payload.toJSONString(), // 将 JSON 对象序列化为字符串
+                MediaType.get("application/json")
         );
 
-        // 构建完整的 HTTP 请求
+        // 4. 构建 HTTP 请求
         Request request = new Request.Builder()
                 .url(API_URL)
-                .addHeader("Authorization", apiKey) // 添加鉴权 header
+                .addHeader("Authorization", apiKey) // Bearer xxx 形式
                 .post(body)
                 .build();
 
-        // 发送请求并处理响应
+        // 5. 发送请求并处理响应
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                throw new IOException("调用失败: " + response.code() + " " + response.message());
+                throw new IOException("智谱 API 调用失败: " + response.code() + " " + response.message());
             }
 
-            // 获取响应体字符串
-            String responseBody = response.body().string();
+            String responseBody = response.body().string();     // 响应 JSON 字符串
+            JSONObject resJson = JSON.parseObject(responseBody); // 解析为 JSONObject
 
-            // 解析 JSON 字符串为 JSONObject（Fastjson 解析）
-            JSONObject resJson = JSON.parseObject(responseBody);
+            // 提取返回的第一条 message 内容（choices -> message -> content）
+            JSONArray choices = resJson.getJSONArray("choices");
+            JSONObject message = choices.getJSONObject(0).getJSONObject("message");
 
-            // 提取返回的 message 内容
-            JSONArray choices = resJson.getJSONArray("choices");           // 获取 choices 数组
-            JSONObject message = choices.getJSONObject(0)                  // 获取第一个 choice
-                    .getJSONObject("message");                             // 获取 message 对象
-
-            return message.getString("content");                           // 返回 content 字段
+            return message.getString("content"); // 最终 AI 回复文本
         }
     }
 }
