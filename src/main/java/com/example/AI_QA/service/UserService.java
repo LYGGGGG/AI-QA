@@ -8,4 +8,6 @@ public interface UserService {
     User login(String username, String password);
 
     User findByUsername(String name);
+
+    User updatePassWord(Long id, String newPassWord);
 }

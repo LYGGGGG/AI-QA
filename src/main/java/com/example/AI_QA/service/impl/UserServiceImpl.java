@@ -30,12 +30,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public User login(String username, String password) {
         User user = userMapper.findByUsername(username);
+
         if (user == null) return null;
+
+        String storedPW = user.getPassword();
 
         // 比对加密密码
         /*if (user.getPassword().equals(password)) {*/
         if (passwordEncoder.matches(password, user.getPassword())){
             return user;
+        }else if (password.equals(storedPW)){
+            String encoded = passwordEncoder.encode(storedPW);
+            user.setPassword(encoded);
+            userMapper.update
         }
         return null;
     }
@@ -43,5 +50,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findByUsername(String name) {
         return userMapper.findByUsername(name);
+    }
+
+    @Override
+    public User updatePassWord(Long id, String newPassWord) {
+        return userMapper.updatePassWord(id, newPassWord);
     }
 }
