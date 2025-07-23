@@ -4,6 +4,8 @@ import okhttp3.*; // 引入 OkHttp 发送 HTTP 请求
 import com.alibaba.fastjson.JSONArray;   // 引入 Fastjson 的 JSONArray 类
 import com.alibaba.fastjson.JSONObject;  // 引入 Fastjson 的 JSONObject 类
 import com.alibaba.fastjson.JSON;        // Fastjson 的 JSON 工具类
+import com.example.AI_QA.dto.ChatMessage;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -39,23 +41,38 @@ public class ZhipuAiUtil {
      */
     public String chat(String userQuestion) throws IOException {
         // 创建 OkHttp 客户端
+        return chat(List.of(new ChatMessage("user", userQuestion)));
+    }
+
+    /**
+     * 根据历史消息调用 AI 接口，返回回复内容
+     *
+     * @param messages 对话历史
+     */
+    public String chat(List<ChatMessage> messages) throws IOException {
         OkHttpClient client = new OkHttpClient.Builder()
                 .connectTimeout(20, java.util.concurrent.TimeUnit.SECONDS)   // 连接超时
                 .readTimeout(30, java.util.concurrent.TimeUnit.SECONDS)      // 读取超时（模型响应慢时用）
                 .writeTimeout(20, java.util.concurrent.TimeUnit.SECONDS)     // 写入超时
                 .build();
 
-        // 创建请求参数 JSON 对象
         JSONObject json = new JSONObject();
         json.put("model", "glm-4-air-250414"); // 指定使用的模型，可换成 "chatglm_turbo"
 
-        // 构建 messages 数组，格式为：[{ "role": "user", "content": "..." }]
+       /* // 构建 messages 数组，格式为：[{ "role": "user", "content": "..." }]
         JSONArray messages = new JSONArray();
         JSONObject userMessage = new JSONObject();
         userMessage.put("role", "user");           // 角色为用户
         userMessage.put("content", userQuestion);  // 用户的问题内容
-        messages.add(userMessage);                 // 添加到数组中
+        messages.add(userMessage);                 // 添加到数组中*/
 
+        JSONArray msgArray = new JSONArray();
+        for (ChatMessage m : messages) {
+            JSONObject obj = new JSONObject();
+            obj.put("role", m.getRole());
+            obj.put("content", m.getContent());
+            msgArray.add(obj);
+        }
         // 将 messages 加入总请求体
         json.put("messages", messages);
 

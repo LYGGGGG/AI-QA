@@ -191,10 +191,13 @@
 
           axios.post('/api/ai/ask', {
             question: this.question,
-            userId: this.currentUser.id
+            <!--userId: this.currentUser.id-->
+            conversationId: this.conversationId
           }).then(res => {
             if (res.data.code === 0) {
-              this.answer = res.data.data;
+              <!--this.answer = res.data.data;-->
+              this.conversationId = res.data.data.conversationId;
+              this.answer = res.data.data.answer;
               this.fetchHistory();
             } else {
               this.answer = "出错：" + res.data.msg;
