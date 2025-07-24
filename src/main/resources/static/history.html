@@ -132,8 +132,20 @@
   </div>
   <h2>我的问答历史</h2>
 
+  <div class="search-bar">
+    <input v-model="keyword" placeholder="关键词" />
+    <input type="date" v-model="startDate" />
+    <input type="date" v-model="endDate" />
+    <input v-model="tag" placeholder="标签" />
+    <button @click="search">搜索</button>
+    <button @click="deleteSelected" style="margin-left:10px">删除选中</button>
+    <button @click="exportSelected" style="margin-left:10px">导出选中</button>
+  </div>
+
   <!-- 问答记录列表 -->
   <div v-for="item in records" :key="item.questionId" class="record">
+    <input type="checkbox" v-model="selected" :value="item.questionId" style="margin-right:8px;"/>
+    <span @click="toggleStar(item)" style="cursor:pointer">{{ item.starred ? '⭐' : '☆' }}</span>
     <div class="question">Q：{{ item.questionContent }}</div>
 
     <div class="answer">
@@ -146,7 +158,10 @@
         {{ item.expanded ? '收起' : '展开' }}
       </a>
     </div>
-    <div class="time">时间：{{ formatTime(item.createTime) }}</div>
+    <div class="time">时间：{{ formatTime(item.createTime) }}
+      <a href="#" @click.prevent="editNote(item)" style="margin-left:10px">备注</a>
+      <a href="#" @click.prevent="showSummary(item)" style="margin-left:10px">概要</a>
+    </div>
   </div>
 
   <!-- 分页区域 -->
@@ -164,7 +179,12 @@
       records: [],        // 问答记录列表
       total: 0,           // 总记录数
       page: 1,            // 当前页码
-      pageSize: 5         // 每页记录数
+      pageSize: 5,        // 每页记录数
+      keyword: '',
+      tag: '',
+      startDate: '',
+      endDate: '',
+      selected: []
     },
     created() {
       this.fetchHistory(); // 页面初始化时加载数据
@@ -175,7 +195,11 @@
         axios.get('/api/qa/history', {
           params: {
             page: this.page,
-            size: this.pageSize
+            size: this.pageSize,
+            keyword: this.keyword,
+            tag: this.tag,
+            startDate: this.startDate,
+            endDate: this.endDate
           }
         }).then(res => {
           if (res.data.code === 0) {
@@ -203,6 +227,11 @@
           this.fetchHistory();
         }
       },
+      toggleStar(item) {
+        axios.post('/api/qa/star', {id: item.questionId, starred: !item.starred}).then(() => {
+          item.starred = !item.starred;
+        });
+      },
       toggleAnswer(item) {
         item.expanded = !item.expanded;
       },
@@ -215,6 +244,43 @@
       // 将 Markdown 文本转为 HTML（行内渲染）
       renderMarkdown(text) {
         return marked.parse(text || '');
+      },
+
+      editNote(item) {
+        const note = prompt('备注', item.note || '');
+        if (note !== null) {
+          axios.post('/api/qa/note', {id: item.questionId, note}).then(() => {
+            item.note = note;
+          });
+        }
+      },
+
+      showSummary(item) {
+        axios.get('/api/qa/summary/' + item.questionId).then(res => {
+          if (res.data.code === 0) {
+            alert(res.data.data);
+          }
+        });
+      },
+
+      deleteSelected() {
+        if (!this.selected.length) return;
+        if (!confirm('确定删除选中的记录?')) return;
+        axios.post('/api/qa/delete', this.selected).then(() => {
+          this.selected = [];
+          this.fetchHistory();
+        });
+      },
+
+      exportSelected() {
+        const data = this.records.filter(r => this.selected.includes(r.questionId));
+        const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'records.json';
+        a.click();
+        URL.revokeObjectURL(url);
       },
 
       // 时间格式化函数：将 ISO 字符串转为 YYYY-MM-DD HH:mm:ss
