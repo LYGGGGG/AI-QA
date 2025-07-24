@@ -146,7 +146,16 @@
     .note-editor button { margin-right: 8px; }
     .summary-box { background:#f0f0f0; padding:10px; margin-top:8px; border-radius:6px; }
     .summary-box button { margin-right:8px; }
-
+.action-link {
+  margin-left: 8px;
+  color: gray;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.action-link:hover {
+  color: #007bff;
+}
   </style>
 </head>
 <body>
@@ -158,9 +167,9 @@
   <h2>我的问答历史</h2>
 
   <div class="search-bar">
-    <input v-model="keyword" placeholder="关键词" />
-    <input type="date" v-model="startDate" />
-    <input type="date" v-model="endDate" />
+    <input v-model="keyword" placeholder="关键词" style="width:140px;" />
+    <input type="date" v-model="startDate" style="width:130px;" />
+    <input type="date" v-model="endDate" style="width:130px;" />
 
     <select v-model="starred">
       <option :value="null" disabled>星标</option>
@@ -180,8 +189,8 @@
   <div v-for="item in records" :key="item.questionId" class="record">
     <input type="checkbox" v-model="selected" :value="item.questionId" style="margin-right:8px;"/>
     <span @click="toggleStar(item)" style="cursor:pointer">{{ item.starred ? '⭐' : '☆' }}</span>
-    <span @click="editNote(item)" style="margin-left:8px;color:#007bff;text-decoration:underline;cursor:pointer">备注</span>
-    <span @click="showSummary(item)" style="margin-left:10px;color:#007bff;text-decoration:underline;cursor:pointer">概要</span>
+    <span @click="editNote(item)" class="action-link">备注</span>
+    <span @click="showSummary(item)" class="action-link">概要</span>
     <div class="question">Q：{{ item.questionContent }}</div>
 
     <div class="answer">
