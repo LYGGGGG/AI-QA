@@ -43,7 +43,7 @@ public interface QuestionMapper {
               AND q.tag = #{tag}
             </if>
             <if test='startDate != null and startDate != ""'>
-              AND q.create_time &gt;= #{startDate}
+              AND q.create_time >= #{startDate}
             </if>
             <if test='endDate != null and endDate != ""'>
               AND q.create_time &lt;= #{endDate}
@@ -73,7 +73,7 @@ public interface QuestionMapper {
               AND q.tag = #{tag}
             </if>
             <if test='startDate != null and startDate != ""'>
-              AND q.create_time &gt;= #{startDate}
+              AND q.create_time >= #{startDate}
             </if>
             <if test='endDate != null and endDate != ""'>
               AND q.create_time &lt;= #{endDate}
