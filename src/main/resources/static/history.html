@@ -187,6 +187,12 @@
       selected: []
     },
     created() {
+      const userStr = sessionStorage.getItem('user');
+      if (!userStr) {
+        alert('请先登录！');
+        window.location.href = 'login.html';
+        return;
+      }
       this.fetchHistory(); // 页面初始化时加载数据
     },
     methods: {
@@ -210,6 +216,11 @@
             alert("加载失败：" + res.data.message);
           }
         });
+      },
+
+      search() {
+        this.page = 1;
+        this.fetchHistory();
       },
 
       // 上一页
