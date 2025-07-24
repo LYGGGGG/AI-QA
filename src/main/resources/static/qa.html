@@ -188,6 +188,12 @@
                     role: 'user',
                     content: this.question
                 });
+                const idx = this.messages.length;
+                this.messages.push({
+                    role: 'assistant',
+                    content: '...'
+                });
+                this.$nextTick(this.scrollToBottom);
 
                 axios.post('/api/ai/ask', {
                     question: this.question,
@@ -197,28 +203,15 @@
                         this.conversationId = res.data.data.conversationId;
                         const answer = res.data.data.answer;
 
-                        this.messages.push({
-                            role: 'assistant',
-                            content: answer
-                        });
+                        this.messages[idx].content = answer;
 
                         this.question = '';
 
-                        this.$nextTick(() => {
-                            this.scrollToBottom();
-                        });
-
                     } else {
-                        this.messages.push({
-                            role: 'assistant',
-                            content: "出错：" + res.data.msg
-                        });
+                        this.messages[idx].content = "出错：" + res.data.msg;
                     }
                 }).catch(err => {
-                    this.messages.push({
-                        role: 'assistant',
-                        content: "请求失败：" + err.message
-                    });
+                    this.messages[idx].content = "请求失败：" + err.message;
                 }).finally(() => {
                     this.loading = false;
                 });
