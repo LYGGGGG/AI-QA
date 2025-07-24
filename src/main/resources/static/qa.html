@@ -2,265 +2,223 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>AI 问答平台</title>
-
-    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
+    <title>
+        AI 问答平台
+    </title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
+    </script>
     <style>
-        body {
-          background: #f5f7fa;
-          font-family: Arial, sans-serif;
-          margin: 0;
-          padding: 0;
-          min-height: 100vh;
-          overflow-y: scroll;
-        }
-
-        .qa-container {
-          max-width: 800px;
-          margin: 60px auto;
-          padding: 30px;
-          min-height: 500px;
-          background: #fff;
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-          min-height: 600px;
-          text-align: center;
-        }
-        .nav {
-          text-align: right;
-          margin-bottom: 10px;
-          font-size: 14px;
-        }
-        .nav a {
-          margin-left: 12px;
-          color: #007bff;
-          text-decoration: none;
-        }
-
-        h2 {
-          margin-bottom: 20px;
-        }
-
-        .user-info {
-          font-size: 14px;
-          color: #444;
-          text-align: right;
-          margin-bottom: 10px;
-        }
-
-        textarea {
-          width: 100%;
-          padding: 12px;
-          font-size: 16px;
-          border: 1px solid #ccc;
-          border-radius: 6px;
-          resize: vertical;
-          box-sizing: border-box;
-        }
-
-        button {
-          margin-top: 16px;
-          padding: 10px 24px;
-          font-size: 16px;
-          background-color: #007bff;
-          color: white;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-        }
-
-        .answer-box {
-          margin-top: 30px;
-          padding: 20px;
-          background-color: #f9f9f9;
-          border-radius: 10px;
-          text-align: left;
-          font-size: 16px;
-          line-height: 1.6;
-          color: #333;
-        }
-
-        .history-link {
-          display: block;
-          margin: 50px auto 0;
-          font-size: 14px;
-          color: #007bff;
-          text-decoration: none;
-          text-align: center;
-        }
-
-        .history-list {
-          margin-top: 20px;
-          text-align: left;
-        }
-
-        .history-item {
-          background: #f4f4f4;
-          padding: 12px;
-          border-radius: 8px;
-          margin-bottom: 12px;
-        }
-
-        .history-item h4 {
-          margin: 0 0 5px;
-        }
-
-        .history-item small {
-          color: gray;
-        }
-
-        .scroll-btns {
-          position: fixed;
-          right: 20px;
-          bottom: 40px;
-          display: flex;
-          flex-direction: column;
-          z-index: 1000;
-        }
-
-        .scroll-btns button {
-          margin-top: 8px;
-          padding: 8px 12px;
-          font-size: 14px;
-          background-color: #007bff;
-          color: #fff;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        }
+        body { background: #f5f7fa; font-family: Arial, sans-serif; margin: 0;
+        padding: 0; min-height: 100vh; overflow-y: scroll; } .qa-container { max-width:
+        800px; margin: 60px auto; padding: 30px; min-height: 500px; background:
+        #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        min-height: 600px; text-align: center; } .nav { text-align: right; margin-bottom:
+        10px; font-size: 14px; } .nav a { margin-left: 12px; color: #007bff; text-decoration:
+        none; } h2 { margin-bottom: 20px; } .user-info { font-size: 14px; color:
+        #444; text-align: right; margin-bottom: 10px; } textarea { width: 100%;
+        padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius:
+        6px; resize: vertical; box-sizing: border-box; } button { margin-top: 16px;
+        padding: 10px 24px; font-size: 16px; background-color: #007bff; color:
+        white; border: none; border-radius: 6px; cursor: pointer; } .answer-box
+        { margin-top: 30px; padding: 20px; background-color: #f9f9f9; border-radius:
+        10px; text-align: left; font-size: 16px; line-height: 1.6; color: #333;
+        } .history-link { display: block; margin: 50px auto 0; font-size: 14px;
+        color: #007bff; text-decoration: none; text-align: center; } .history-list
+        { margin-top: 20px; text-align: left; } .history-item { background: #f4f4f4;
+        padding: 12px; border-radius: 8px; margin-bottom: 12px; } .history-item
+        h4 { margin: 0 0 5px; } .history-item small { color: gray; } .scroll-btns
+        { position: fixed; right: 20px; bottom: 40px; display: flex; flex-direction:
+        column; z-index: 1000; } .scroll-btns button { margin-top: 8px; width:
+        36px; height: 36px; font-size: 18px; background-color: #007bff; color:
+        #fff; border: none; border-radius: 50%; cursor: pointer; } .chat-history
+        { text-align: left; margin-top: 20px; max-height: 500px; overflow-y: auto;
+        } .msg { display: flex; margin-bottom: 16px; align-items: flex-start; }
+        .msg.user { flex-direction: row; } .msg.assistant { flex-direction: row-reverse;
+        } .sender { font-weight: bold; width: 60px; } .bubble { padding: 12px 16px;
+        border-radius: 12px; max-width: 75%; background-color: #f1f3f5; line-height:
+        1.6; } .msg.assistant .bubble { background-color: #e0f3ff; }
     </style>
 </head>
 <body>
 <div id="app" class="qa-container">
     <div class="nav">
-        <a href="history.html">历史记录</a>
-        <a href="#" @click.prevent="logout">退出登录</a>
+        <a href="history.html">
+            历史记录
+        </a>
+        <a href="#" @click.prevent="logout">
+            退出登录
+        </a>
     </div>
-    <div class="user-info">当前用户：{{ currentUser.username || '未登录' }}</div>
-
-    <h2>AI 问答平台</h2>
-
-    <div class="history-list" v-if="records.length">
-        <div class="history-item" v-for="item in records" :key="item.questionId">
-            <h4>Q：{{ item.questionContent }}</h4>
-            <div v-html="renderMarkdown(item.answerContent)"></div>
-            <small>{{ formatTime(item.createTime) }}</small>
+    <div class="user-info">
+        当前用户：{{ currentUser.username || '未登录' }}
+    </div>
+    <h2>
+        AI 问答平台
+    </h2>
+    <div class="chat-history">
+        <div v-for="(msg, i) in messages" :key="i" :class="['msg', msg.role]">
+					<span class="sender">
+						{{ msg.role === 'user' ? 'Q：' : '🤖：' }}
+					</span>
+            <div class="bubble" v-html="renderMarkdown(msg.content)">
+            </div>
         </div>
     </div>
-
-    <div class="answer-box" v-if="answer">
-        <h3>AI 的回答：</h3>
-        <div v-html="compiledAnswer"></div>
+    <!-- <div class="history-list" v-if="records.length">
+    <div class="history-item" v-for="item in records" :key="item.questionId">
+    <h4>Q：{{ item.questionContent }}</h4>
+    <div v-html="renderMarkdown(item.answerContent)"></div>
     </div>
-
-    <textarea
-            v-model="question"
-            placeholder="请输入你的问题..."
-            rows="5"
-            @keydown.enter.exact.prevent="askAI"
-    ></textarea>
-
+    </div>
+    <div class="answer-box" v-if="answer">
+    <h3>AI 的回答：</h3>
+    <div v-html="compiledAnswer"></div>
+    </div>-->
+    <textarea v-model="question" placeholder="请输入你的问题..." rows="5" @keydown.enter.exact.prevent="askAI">
+			</textarea>
     <br>
     <button @click="askAI" :disabled="loading">
         {{ loading ? "提问中..." : "提问" }}
     </button>
-
 </div>
-
 <div class="scroll-btns">
-    <button @click="scrollToTop">顶部</button>
-    <button @click="scrollToBottom">底部</button>
+    <button @click="scrollToTop" aria-label="回到顶部">
+        ▲
+    </button>
+    <button @click="scrollToBottom" aria-label="滚动到底部">
+        ▼
+    </button>
 </div>
-
 <script>
     new Vue({
-      el: '#app',
-      data: {
-        question: '',
-        answer: '',
-        loading: false,
-        currentUser: {},
-        conversationId: '',
-        records: [],
-      },
-      computed: {
-        compiledAnswer() {
-          return marked.parse(this.answer || '');
-        }
-      },
-      created() {
-        const userStr = sessionStorage.getItem("user");
-        if (!userStr) {
-          alert("请先登录！");
-          window.location.href = "/login.html";
-          return;
-        }
-        this.currentUser = JSON.parse(userStr);
-        this.fetchHistory();
-      },
-      methods: {
-        askAI() {
-          if (!this.question.trim()) {
-            alert("请输入问题！");
-            return;
-          }
-          this.loading = true;
-          this.answer = "";
+        el: '#app',
+        data: {
+            question: '',
+            answer: '',
+            loading: false,
+            currentUser: {},
+            conversationId: '',
+            records: [],
+            messages: []
+        },
+        computed: {
+            compiledAnswer() {
+                return marked.parse(this.answer || '');
+            }
+        },
+        created() {
+            const userStr = sessionStorage.getItem("user");
+            if (!userStr) {
+                alert("请先登录！");
+                window.location.href = "/login.html";
+                return;
+            }
+            this.currentUser = JSON.parse(userStr);
+            this.fetchHistory();
+        },
+        methods: {
+            askAI() {
+                if (!this.question.trim()) {
+                    alert("请输入问题！");
+                    return;
+                }
+                this.loading = true;
+                this.answer = "";
 
-          axios.post('/api/ai/ask', {
-            question: this.question,
-            <!--userId: this.currentUser.id-->
-            conversationId: this.conversationId
-          }).then(res => {
-            if (res.data.code === 0) {
-              <!--this.answer = res.data.data;-->
-              this.conversationId = res.data.data.conversationId;
-              this.answer = res.data.data.answer;
-              this.fetchHistory();
-            } else {
-              this.answer = "出错：" + res.data.msg;
+                axios.post('/api/ai/ask', {
+                    question: this.question,
+                    conversationId: this.conversationId
+                }).then(res = >{
+                    if (res.data.code === 0) {
+                        this.conversationId = res.data.data.conversationId;
+                        const answer = res.data.data.answer;
+
+                        this.messages.push({
+                            role: 'user',
+                            content: this.question
+                        });
+
+                        axios.post('/api/ai/ask', {
+                            question: this.question,
+                            conversationId: this.conversationId
+                        }).then(res = >{
+                            if (res.data.code === 0) {
+                                this.conversationId = res.data.data.conversationId;
+                                const answer = res.data.data.answer;
+
+                                this.messages.push({
+                                    role: 'assistant',
+                                    content: answer
+                                });
+
+                                this.question = '';
+                                this.$nextTick(() = >{
+                                    this.scrollToBottom();
+                                });
+                            } else {
+                                this.messages.push({
+                                    role: 'assistant',
+                                    content: "出错：" + res.data.msg
+                                });
+                            }
+                        });
+
+                        if (this.records.length > 5) {
+                            this.records.shift();
+                        }
+                        this.question = '';
+                    } else {
+                        this.answer = "出错：" + res.data.msg;
+                    }
+                }).
+                catch(err = >{
+                    this.answer = "请求失败：" + err.message;
+                }).
+                finally(() = >{
+                    this.loading = false;
+                });
+            },
+            fetchHistory() {
+                axios.get('/api/qa/history', {
+                    params: {
+                        page: 1,
+                        size: 5
+                    }
+                }).then(res = >{
+                    if (res.data.code === 0) {
+                        this.records = res.data.data.records.reverse();
+                    }
+                });
+            },
+            renderMarkdown(text) {
+                return marked.parse(text || '');
+            },
+            formatTime(ts) {
+                return ts ? ts.replace("T", " ").slice(0, 19) : '';
+            },
+            scrollToBottom() {
+                this.$nextTick(() = >{
+                    const el = this.$el.querySelector(".chat-history");
+                    if (el) el.scrollTop = el.scrollHeight;
+                });
+            },
+            scrollToTop() {
+                const el = this.$el.querySelector(".chat-history");
+                if (el) el.scrollTop = 0;
+            };
+            logout() {
+                axios.post('/api/user/logout').then(() = >{
+                    sessionStorage.removeItem('user');
+                    window.location.href = 'index.html';
+                });
             }
-          }).catch(err => {
-            this.answer = "请求失败：" + err.message;
-          }).finally(() => {
-            this.loading = false;
-          });
-        },
-        fetchHistory() {
-          axios.get('/api/qa/history', {
-            params: {
-              page: 1,
-              size: 5
-            }
-          }).then(res => {
-            if (res.data.code === 0) {
-              this.records = res.data.data.records.reverse();
-            }
-          });
-        },
-        renderMarkdown(text) {
-          return marked.parse(text || '');
-        },
-        formatTime(ts) {
-          return ts ? ts.replace("T", " ").slice(0, 19) : '';
-        },
-        scrollToTop() {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        },
-        scrollToBottom() {
-          window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
-        },
-        logout() {
-          axios.post('/api/user/logout').then(() => {
-            sessionStorage.removeItem('user');
-            window.location.href = 'index.html';
-          });
         }
-      }
     });
 </script>
 </body>
+
 </html>
