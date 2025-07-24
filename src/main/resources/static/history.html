@@ -176,6 +176,7 @@
   </div>
 
   <!-- 问答记录列表 -->
+  <div v-if="records.length === 0" style="text-align:center;color:#777;margin-top:40px;">暂无记录</div>
   <div v-for="item in records" :key="item.questionId" class="record">
     <input type="checkbox" v-model="selected" :value="item.questionId" style="margin-right:8px;"/>
     <span @click="toggleStar(item)" style="cursor:pointer">{{ item.starred ? '⭐' : '☆' }}</span>
@@ -258,6 +259,7 @@
               summaryText: r.summary || ''
             }));
             this.total = res.data.data.total;
+            this.selected = []; // 切换页面或搜索时清空已选记录
           } else {
             alert("加载失败：" + res.data.message);
           }
