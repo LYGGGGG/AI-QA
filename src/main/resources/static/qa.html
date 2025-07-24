@@ -123,6 +123,19 @@
 
     <h2>AI 问答平台</h2>
 
+    <div class="history-list" v-if="records.length">
+        <div class="history-item" v-for="item in records" :key="item.questionId">
+            <h4>Q：{{ item.questionContent }}</h4>
+            <div v-html="renderMarkdown(item.answerContent)"></div>
+            <small>时间：{{ formatTime(item.createTime) }}</small>
+        </div>
+    </div>
+
+    <div class="answer-box" v-if="answer">
+        <h3>AI 的回答：</h3>
+        <div v-html="compiledAnswer"></div>
+    </div>
+
     <textarea
             v-model="question"
             placeholder="请输入你的问题..."
@@ -135,24 +148,9 @@
         {{ loading ? "提问中..." : "提问" }}
     </button>
 
-    <div class="answer-box" v-if="answer">
-        <h3>AI 的回答：</h3>
-        <div v-html="compiledAnswer"></div>
-    </div>
-
     <!-- 历史记录链接，保持和提问区域一定空距 -->
     <a href="/history.html" class="history-link">历史记录 »</a>
 
-    <!-- 可选的内嵌历史展示（如启用 showHistory 时使用） -->
-    <!--
-    <div class="history-list" v-if="showHistory && records.length">
-      <div class="history-item" v-for="item in records" :key="item.questionId">
-        <h4>Q：{{ item.questionContent }}</h4>
-        <div v-html="renderMarkdown(item.answerContent)"></div>
-        <small>时间：{{ formatTime(item.createTime) }}</small>
-      </div>
-    </div>
-    -->
 </div>
 
 <script>
@@ -165,7 +163,6 @@
         currentUser: {},
         conversationId: '',
         records: [],
-        showHistory: false
       },
       computed: {
         compiledAnswer() {
@@ -180,6 +177,7 @@
           return;
         }
         this.currentUser = JSON.parse(userStr);
+        this.fetchHistory();
       },
       methods: {
         askAI() {
