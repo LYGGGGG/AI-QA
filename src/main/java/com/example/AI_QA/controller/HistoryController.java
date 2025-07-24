@@ -91,4 +91,12 @@ public class HistoryController {
         }
         return Result.success(summary);
     }
+
+    @PostMapping("/summary")
+    public Result<?> updateSummary(@RequestBody Map<String, String> param) {
+        Long id = Long.valueOf(param.get("id"));
+        String summary = param.get("summary");
+        questionMapper.updateSummary(id, summary);
+        return Result.success();
+    }
 }

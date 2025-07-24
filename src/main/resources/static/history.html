@@ -163,20 +163,24 @@
     <input type="date" v-model="endDate" />
 
     <select v-model="starred">
+      <option :value="null" disabled>星标</option>
       <option value="">全部</option>
       <option value="true">已星标</option>
       <option value="false">未星标</option>
     </select>
 
     <button @click="search">搜索</button>
-    <button @click="deleteSelected">删除</button>
-    <button @click="exportSelected">导出</button>
+    <button @click="resetSearch" style="margin-left: 5px;">重置</button>
+    <button @click="deleteSelected" style="margin-left: 5px;">删除</button>
+    <button @click="exportSelected" style="margin-left: 5px;">导出</button>
   </div>
 
   <!-- 问答记录列表 -->
   <div v-for="item in records" :key="item.questionId" class="record">
     <input type="checkbox" v-model="selected" :value="item.questionId" style="margin-right:8px;"/>
     <span @click="toggleStar(item)" style="cursor:pointer">{{ item.starred ? '⭐' : '☆' }}</span>
+    <span @click="editNote(item)" style="margin-left:8px;color:#007bff;text-decoration:underline;cursor:pointer">备注</span>
+    <span @click="showSummary(item)" style="margin-left:10px;color:#007bff;text-decoration:underline;cursor:pointer">概要</span>
     <div class="question">Q：{{ item.questionContent }}</div>
 
     <div class="answer">
@@ -189,11 +193,7 @@
         {{ item.expanded ? '收起' : '展开' }}
       </a>
     </div>
-    <div class="time">{{ formatTime(item.createTime) }}
-      <a href="#" @click.prevent="editNote(item)" style="margin-left:10px">备注</a>
-      <a href="#" @click.prevent="showSummary(item)" style="margin-left:10px">概要</a>
-    </div>
-    <div v-if="item.note && !item.editingNote" class="note">备注：{{ item.note }}</div>
+    <div class="time">{{ formatTime(item.createTime) }}</div>
     <div v-if="item.editingNote" class="note-editor">
       <textarea v-model="item.tempNote" rows="3"></textarea>
       <button @click="saveNote(item)">保存</button>
@@ -223,7 +223,7 @@
       page: 1,            // 当前页码
       pageSize: 5,        // 每页记录数
       keyword: '',
-      starred: '',
+      starred: null,
       startDate: '',
       endDate: '',
       selected: []
@@ -240,16 +240,15 @@
     methods: {
       // 获取分页问答记录
       fetchHistory() {
-        axios.get('/api/qa/history', {
-          params: {
-            page: this.page,
-            size: this.pageSize,
-            keyword: this.keyword,
-            starred: this.starred,
-            startDate: this.startDate,
-            endDate: this.endDate
-          }
-        }).then(res => {
+        const params = {
+          page: this.page,
+          size: this.pageSize,
+          keyword: this.keyword,
+          startDate: this.startDate,
+          endDate: this.endDate
+        };
+        if (this.starred !== null) params.starred = this.starred;
+        axios.get('/api/qa/history', { params }).then(res => {
           if (res.data.code === 0) {
               this.records = res.data.data.records.map(r => Object.assign(r, {
               expanded: false,
@@ -269,6 +268,16 @@
         this.page = 1;
         this.fetchHistory();
       },
+
+      resetSearch() {
+        this.keyword = '';
+        this.starred = null;
+        this.startDate = '';
+        this.endDate = '';
+        this.page = 1;
+        this.fetchHistory();
+      },
+
 
       // 上一页
       prevPage() {
