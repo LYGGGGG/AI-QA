@@ -64,6 +64,7 @@ public class AiController {
         Question question = new Question();
         question.setUserId(userId);
         question.setContent(questionText);
+        question.setStarred(false);
         question.setStatus("waiting");
         questionMapper.insert(question); // 自动回填 ID
 
@@ -79,6 +80,9 @@ public class AiController {
             answer.setAnswerContent(aiAnswer);
             answer.setModelUsed("glm-4-air-250414"); // 可配置化
             answerMapper.insert(answer);
+
+            String summary = aiAnswer.length() > 100 ? aiAnswer.substring(0, 100) + "..." : aiAnswer;
+            questionMapper.updateSummary(question.getId(), summary);
 
             // 4. 更新提问状态为 answered
             questionMapper.updateStatus(question.getId(), "answered");
