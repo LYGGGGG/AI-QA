@@ -169,8 +169,8 @@
     </select>
 
     <button @click="search">搜索</button>
-    <button @click="deleteSelected">删除选中</button>
-    <button @click="exportSelected">导出选中</button>
+    <button @click="deleteSelected">删除</button>
+    <button @click="exportSelected">导出</button>
   </div>
 
   <!-- 问答记录列表 -->
@@ -189,7 +189,7 @@
         {{ item.expanded ? '收起' : '展开' }}
       </a>
     </div>
-    <div class="time">时间：{{ formatTime(item.createTime) }}
+    <div class="time">{{ formatTime(item.createTime) }}
       <a href="#" @click.prevent="editNote(item)" style="margin-left:10px">备注</a>
       <a href="#" @click.prevent="showSummary(item)" style="margin-left:10px">概要</a>
     </div>
