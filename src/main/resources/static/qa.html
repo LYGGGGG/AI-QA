@@ -129,56 +129,45 @@
                 this.loading = true;
                 this.answer = "";
 
+                this.messages.push({
+                    role: 'user',
+                    content: this.question
+                });
+
                 axios.post('/api/ai/ask', {
                     question: this.question,
                     conversationId: this.conversationId
-                }).then(res = >{
+                }).then(res =>{
                     if (res.data.code === 0) {
                         this.conversationId = res.data.data.conversationId;
                         const answer = res.data.data.answer;
 
                         this.messages.push({
-                            role: 'user',
-                            content: this.question
+                            role: 'assistant',
+                            content: answer
                         });
 
-                        axios.post('/api/ai/ask', {
-                            question: this.question,
-                            conversationId: this.conversationId
-                        }).then(res = >{
-                            if (res.data.code === 0) {
-                                this.conversationId = res.data.data.conversationId;
-                                const answer = res.data.data.answer;
-
-                                this.messages.push({
-                                    role: 'assistant',
-                                    content: answer
-                                });
-
-                                this.question = '';
-                                this.$nextTick(() = >{
-                                    this.scrollToBottom();
-                                });
-                            } else {
-                                this.messages.push({
-                                    role: 'assistant',
-                                    content: "出错：" + res.data.msg
-                                });
-                            }
+                        this.question = '';
+                        this.$nextTick(() =>{
+                            this.scrollToBottom();
                         });
-
                         if (this.records.length > 5) {
                             this.records.shift();
                         }
-                        this.question = '';
                     } else {
-                        this.answer = "出错：" + res.data.msg;
+                        this.messages.push({
+                            role: 'assistant',
+                            content: "出错：" + res.data.msg
+                        });
                     }
                 }).
-                catch(err = >{
-                    this.answer = "请求失败：" + err.message;
+                catch(err =>{
+                    this.messages.push({
+                        role: 'assistant',
+                        content: "请求失败：" + err.message
+                    });
                 }).
-                finally(() = >{
+                finally(() =>{
                     this.loading = false;
                 });
             },
@@ -188,7 +177,7 @@
                         page: 1,
                         size: 5
                     }
-                }).then(res = >{
+                }).then(res =>{
                     if (res.data.code === 0) {
                         this.records = res.data.data.records.reverse();
                     }
@@ -201,7 +190,7 @@
                 return ts ? ts.replace("T", " ").slice(0, 19) : '';
             },
             scrollToBottom() {
-                this.$nextTick(() = >{
+                this.$nextTick(() =>{
                     const el = this.$el.querySelector(".chat-history");
                     if (el) el.scrollTop = el.scrollHeight;
                 });
@@ -209,9 +198,9 @@
             scrollToTop() {
                 const el = this.$el.querySelector(".chat-history");
                 if (el) el.scrollTop = 0;
-            };
+            },
             logout() {
-                axios.post('/api/user/logout').then(() = >{
+                axios.post('/api/user/logout').then(() =>{
                     sessionStorage.removeItem('user');
                     window.location.href = 'index.html';
                 });
