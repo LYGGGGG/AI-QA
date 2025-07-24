@@ -81,7 +81,13 @@ public class AiController {
             answer.setModelUsed("glm-4-air-250414"); // 可配置化
             answerMapper.insert(answer);
 
-            String summary = aiAnswer.length() > 100 ? aiAnswer.substring(0, 100) + "..." : aiAnswer;
+            String summary;
+            try {
+                summary = zhipuAiUtil.summarize(aiAnswer);
+            } catch (Exception e) {
+                summary = aiAnswer.length() > 100 ? aiAnswer.substring(0, 100) + "..." : aiAnswer;
+            }
+
             questionMapper.updateSummary(question.getId(), summary);
 
             // 4. 更新提问状态为 answered

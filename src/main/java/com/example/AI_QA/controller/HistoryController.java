@@ -3,6 +3,7 @@ package com.example.AI_QA.controller;
 import com.example.AI_QA.common.Result;
 import com.example.AI_QA.entity.User;
 import com.example.AI_QA.mapper.QuestionMapper;
+import com.example.AI_QA.util.ZhipuAiUtil;
 import com.example.AI_QA.vo.QuestionAnswerVO;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +20,15 @@ public class HistoryController {
     @Autowired
     private QuestionMapper questionMapper;
 
+    @Autowired
+    private ZhipuAiUtil zhipuAiUtil;
+
     @GetMapping("/history")
     public Result<Map<String, Object>> getUserHistory(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) String tag,
+            @RequestParam(required = false) Boolean starred,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             HttpServletRequest request) {
@@ -38,8 +42,8 @@ public class HistoryController {
         Long userId = user.getId();
 
         int offset = (page - 1) * size;
-        List<QuestionAnswerVO> list = questionMapper.findUserQA(userId, keyword, tag, startDate, endDate, size, offset);
-        int total = questionMapper.countUserQA(userId, keyword, tag, startDate, endDate);
+        List<QuestionAnswerVO> list = questionMapper.findUserQA(userId, keyword, starred, startDate, endDate, size, offset);
+        int total = questionMapper.countUserQA(userId, keyword, starred, startDate, endDate);
 
         Map<String, Object> result = new HashMap<>();
         result.put("records", list);
@@ -78,7 +82,12 @@ public class HistoryController {
         if (summary == null || summary.isBlank()) {
             String answer = qa.getAnswerContent();
             if (answer == null) answer = "";
-            summary = answer.length() > 100 ? answer.substring(0, 100) + "..." : answer;
+            try {
+                summary = zhipuAiUtil.summarize(answer);
+            } catch (Exception e) {
+                summary = answer.length() > 100 ? answer.substring(0, 100) + "..." : answer;
+            }
+            questionMapper.updateSummary(id, summary);
         }
         return Result.success(summary);
     }

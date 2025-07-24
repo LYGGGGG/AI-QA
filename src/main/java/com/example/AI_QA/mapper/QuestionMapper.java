@@ -28,7 +28,6 @@ public interface QuestionMapper {
             <script>
             SELECT q.id AS questionId,
                    q.content AS questionContent,
-                   q.tag,
                    q.starred,
                    q.note,
                    q.summary,
@@ -39,8 +38,8 @@ public interface QuestionMapper {
             <if test='keyword != null and keyword != ""'>
               AND (q.content LIKE CONCAT('%',#{keyword},'%') OR a.answer_content LIKE CONCAT('%',#{keyword},'%'))
             </if>
-            <if test='tag != null and tag != ""'>
-              AND q.tag = #{tag}
+            <if test='starred != null'>
+              AND q.starred = #{starred}
             </if>
             <if test='startDate != null and startDate != ""'>
               AND q.create_time >= #{startDate}
@@ -54,7 +53,7 @@ public interface QuestionMapper {
             """)
     List<QuestionAnswerVO> findUserQA(@Param("userId") Long userId,
                                       @Param("keyword") String keyword,
-                                      @Param("tag") String tag,
+                                      @Param("starred") Boolean starred,
                                       @Param("startDate") String startDate,
                                       @Param("endDate") String endDate,
                                       @Param("limit") int limit,
@@ -69,8 +68,8 @@ public interface QuestionMapper {
             <if test='keyword != null and keyword != ""'>
               AND (q.content LIKE CONCAT('%',#{keyword},'%') OR a.answer_content LIKE CONCAT('%',#{keyword},'%'))
             </if>
-            <if test='tag != null and tag != ""'>
-              AND q.tag = #{tag}
+            <if test='starred != null'>
+              AND q.starred = #{starred}
             </if>
             <if test='startDate != null and startDate != ""'>
               AND q.create_time >= #{startDate}
@@ -82,7 +81,7 @@ public interface QuestionMapper {
             """)
     int countUserQA(@Param("userId") Long userId,
                     @Param("keyword") String keyword,
-                    @Param("tag") String tag,
+                    @Param("starred") Boolean starred,
                     @Param("startDate") String startDate,
                     @Param("endDate") String endDate);
 

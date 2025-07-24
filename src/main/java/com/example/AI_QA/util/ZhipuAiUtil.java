@@ -99,4 +99,12 @@ public class ZhipuAiUtil {
             return message.getString("content"); // 最终 AI 回复文本
         }
     }
+
+    /**
+     * 使用大模型对给定文本进行总结，返回简短概括。
+     */
+    public String summarize(String text) throws IOException {
+        String prompt = "请用中文简要概括以下内容，不超过80字：\n" + text;
+        return chat(List.of(new ChatMessage("user", prompt)));
+    }
 }
