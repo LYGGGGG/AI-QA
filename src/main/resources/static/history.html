@@ -49,18 +49,30 @@
       margin-bottom: 30px;
     }
 
-    /* 每条问答记录样式 */
     .record {
-      background: #fafafa;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
+  position: relative; /* 关键：允许内部绝对定位 */
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.action-header {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: gray;
+}
+
 
     .question {
       font-weight: bold;
-      margin-bottom: 12px;
+      margin-bottom: 20px;
       font-size: 16px;
     }
 
@@ -68,6 +80,7 @@
       font-size: 15px;
       color: #333;
       line-height: 1.6;
+      margin-bottom: 16px;
     }
 
     .answer strong {
@@ -77,7 +90,19 @@
     .answer span {
       white-space: pre-wrap; /* 保留换行 */
     }
+    .meta-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: gray;
+}
 
+.meta-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
     .time {
       font-size: 13px;
       color: gray;
@@ -123,11 +148,26 @@
       background: linear-gradient(to top, #fafafa, transparent);
     }
 
-    .search-bar {
+  .search-bar {
       display: flex;
+      justify-content: space-between;
       flex-wrap: wrap;
       gap: 10px;
       margin-bottom: 20px;
+    }
+
+    .search-bar .fields {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex: 1 1 auto;
+      min-width: 300px;
+    }
+
+    .search-bar .actions {
+      flex-shrink: 0;
+      display: flex;
+      align-items: flex-start;
     }
 
     .search-bar input,
@@ -139,6 +179,11 @@
     .search-bar button {
       padding: 6px 14px;
       font-size: 14px;
+      margin-left: 5px;
+    }
+
+    .search-bar button:first-child {
+      margin-left: 0;
     }
 
     .note { margin-top: 8px; font-size: 14px; color: #555; }
@@ -146,6 +191,7 @@
     .note-editor button { margin-right: 8px; }
     .summary-box { background:#f0f0f0; padding:10px; margin-top:8px; border-radius:6px; }
     .summary-box button { margin-right:8px; }
+
 .action-link {
   margin-left: 8px;
   color: gray;
@@ -167,32 +213,40 @@
   <h2>我的问答历史</h2>
 
   <div class="search-bar">
-    <input v-model="keyword" placeholder="关键词" style="width:140px;" />
-    <input type="date" v-model="startDate" style="width:130px;" />
-    <input type="date" v-model="endDate" style="width:130px;" />
-
-    <select v-model="starred">
-      <option :value="null" disabled>星标</option>
-      <option value="">全部</option>
-      <option value="true">已星标</option>
-      <option value="false">未星标</option>
-    </select>
-
-    <button @click="search">搜索</button>
-    <button @click="resetSearch" style="margin-left: 5px;">重置</button>
-    <button @click="deleteSelected" style="margin-left: 5px;">删除</button>
-    <button @click="exportSelected" style="margin-left: 5px;">导出</button>
+    <div class="fields">
+      <input v-model="keyword" placeholder="关键词或回答内容" />
+      <input type="date" v-model="startDate" />
+      <input type="date" v-model="endDate" />
+      <select v-model="starred">
+        <option :value="null" disabled>星标</option>
+        <option value="">全部</option>
+        <option value="true">已星标</option>
+        <option value="false">未星标</option>
+      </select>
+    </div>
+    <div class="actions">
+      <button @click="search">搜索</button>
+      <button @click="resetSearch">重置</button>
+      <button @click="deleteSelected">删除</button>
+      <button @click="exportSelected">导出</button>
+    </div>
   </div>
 
   <!-- 问答记录列表 -->
   <div v-if="records.length === 0" style="text-align:center;color:#777;margin-top:40px;">暂无记录</div>
   <div v-for="item in records" :key="item.questionId" class="record">
-    <input type="checkbox" v-model="selected" :value="item.questionId" style="margin-right:8px;"/>
-    <span @click="toggleStar(item)" style="cursor:pointer">{{ item.starred ? '⭐' : '☆' }}</span>
-    <span @click="editNote(item)" class="action-link">备注</span>
-    <span @click="showSummary(item)" class="action-link">概要</span>
+    <!-- 右上角操作栏 -->
+    <div class="action-header">
+      <input type="checkbox" v-model="selected" :value="item.questionId" />
+      <span @click="toggleStar(item)" style="cursor:pointer">{{ item.starred ? '⭐' : '☆' }}</span>
+      <span @click="editNote(item)" class="action-link">备注</span>
+      <span @click="showSummary(item)" class="action-link">概要</span>
+    </div>
+
+    <!-- 问题 -->
     <div class="question">Q：{{ item.questionContent }}</div>
 
+    <!-- 回答 -->
     <div class="answer">
       <strong>A：</strong>
       <div :class="{collapsed: !item.expanded}" v-html="renderMarkdown(item.answerContent || '')"></div>
@@ -203,18 +257,25 @@
         {{ item.expanded ? '收起' : '展开' }}
       </a>
     </div>
+
+    <!-- 时间显示 -->
     <div class="time">{{ formatTime(item.createTime) }}</div>
+
+    <!-- 备注编辑框 -->
     <div v-if="item.editingNote" class="note-editor">
       <textarea v-model="item.tempNote" rows="3"></textarea>
       <button @click="saveNote(item)">保存</button>
       <button @click="cancelEdit(item)">取消</button>
     </div>
+
+    <!-- 概要显示框 -->
     <div v-if="item.showSummary" class="summary-box">
       <p>{{ item.summaryText }}</p>
       <button @click="item.showSummary = false">确定</button>
       <button @click="clearSummary(item)">清空</button>
     </div>
   </div>
+</div>
 
   <!-- 分页区域 -->
   <div class="pagination" v-if="total > pageSize">
