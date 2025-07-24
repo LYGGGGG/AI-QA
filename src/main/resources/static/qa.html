@@ -73,27 +73,6 @@
             cursor: pointer;
         }
 
-        .scroll-btns {
-            position: fixed;
-            right: 20px;
-            bottom: 40px;
-            display: flex;
-            flex-direction: column;
-            z-index: 1000;
-        }
-
-        .scroll-btns button {
-            margin-top: 8px;
-            width: 36px;
-            height: 36px;
-            font-size: 18px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
         .chat-history {
             text-align: left;
             margin-top: 20px;
@@ -167,11 +146,6 @@
     </button>
 </div>
 
-<div class="scroll-btns">
-    <button @click="scrollToTop" aria-label="回到顶部">▲</button>
-    <button @click="scrollToBottom" aria-label="滚动到底部">▼</button>
-</div>
-
 <script>
     new Vue({
         el: '#app',
@@ -224,9 +198,6 @@
                             this.scrollToBottom();
                         });
 
-                        if (this.records.length > 5) {
-                            this.records.shift();
-                        }
                     } else {
                         this.messages.push({
                             role: 'assistant',
@@ -279,10 +250,6 @@
                     const el = this.$el.querySelector(".chat-history");
                     if (el) el.scrollTop = el.scrollHeight;
                 });
-            },
-            scrollToTop() {
-                const el = this.$el.querySelector(".chat-history");
-                if (el) el.scrollTop = 0;
             },
             logout() {
                 axios.post('/api/user/logout').then(() => {
