@@ -73,17 +73,6 @@
             cursor: pointer;
         }
 
-        .answer-box {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 10px;
-            text-align: left;
-            font-size: 16px;
-            line-height: 1.6;
-            color: #333;
-        }
-
         .scroll-btns {
             position: fixed;
             right: 20px;
@@ -135,12 +124,12 @@
             padding: 12px 16px;
             border-radius: 12px;
             max-width: 75%;
-            background-color: #f1f3f5;
+            background-color: #f2f4f6;
             line-height: 1.6;
         }
 
         .msg.assistant .bubble {
-            background-color: #e0f3ff;
+            background-color: #e6f1fb;
         }
     </style>
 </head>
@@ -188,17 +177,10 @@
         el: '#app',
         data: {
             question: '',
-            answer: '',
             loading: false,
             currentUser: {},
             conversationId: '',
-            records: [],
             messages: []
-        },
-        computed: {
-            compiledAnswer() {
-                return marked.parse(this.answer || '');
-            }
         },
         created() {
             const userStr = sessionStorage.getItem("user");
@@ -217,7 +199,6 @@
                     return;
                 }
                 this.loading = true;
-                this.answer = "";
 
                 this.messages.push({
                     role: 'user',
@@ -269,7 +250,24 @@
                     }
                 }).then(res => {
                     if (res.data.code === 0) {
-                        this.records = res.data.data.records.reverse();
+                        <!--this.records = res.data.data.records.reverse();-->
+                        const list = res.data.data.records.reverse();
+                        this.messages = [];
+                        list.forEach(r => {
+                            if (r.questionContent) {
+                                this.messages.push({
+                                    role: 'user',
+                                    content: r.questionContent
+                                });
+                            }
+                            if (r.answerContent) {
+                                this.messages.push({
+                                    role: 'assistant',
+                                    content: r.answerContent
+                                });
+                            }
+                        });
+                        this.$nextTick(this.scrollToBottom);
                     }
                 });
             },
